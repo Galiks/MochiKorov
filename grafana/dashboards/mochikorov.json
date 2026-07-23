@@ -1,0 +1,65 @@
+{
+  "title": "MochiKorov",
+  "uid": "mochikorov",
+  "version": 1,
+  "timezone": "browser",
+  "panels": [
+    {
+      "title": "Games Started",
+      "type": "stat",
+      "gridPos": {"x": 0, "y": 0, "w": 4, "h": 4},
+      "targets": [{"expr": "mochikorov_games_started_total", "datasource": "Prometheus"}]
+    },
+    {
+      "title": "Games Completed",
+      "type": "stat",
+      "gridPos": {"x": 4, "y": 0, "w": 4, "h": 4},
+      "targets": [{"expr": "mochikorov_games_completed_total", "datasource": "Prometheus"}]
+    },
+    {
+      "title": "Active Games",
+      "type": "gauge",
+      "gridPos": {"x": 8, "y": 0, "w": 4, "h": 4},
+      "targets": [{"expr": "mochikorov_active_games", "datasource": "Prometheus"}]
+    },
+    {
+      "title": "Rolls",
+      "type": "stat",
+      "gridPos": {"x": 12, "y": 0, "w": 4, "h": 4},
+      "targets": [{"expr": "rate(mochikorov_rolls_total[5m])", "datasource": "Prometheus"}]
+    },
+    {
+      "title": "Most Bought Cards",
+      "type": "barchart",
+      "gridPos": {"x": 0, "y": 4, "w": 8, "h": 8},
+      "targets": [{"expr": "topk(10, mochikorov_cards_bought_total)", "datasource": "Prometheus", "legendFormat": "{{card_name}}"}],
+      "fieldConfig": {
+        "defaults": {"unit": "short"},
+        "overrides": []
+      }
+    },
+    {
+      "title": "Player Money",
+      "type": "gauge",
+      "gridPos": {"x": 8, "y": 4, "w": 8, "h": 8},
+      "targets": [{"expr": "mochikorov_player_money", "datasource": "Prometheus", "legendFormat": "{{player_name}}"}]
+    },
+    {
+      "title": "Recent Game Logs",
+      "type": "logs",
+      "gridPos": {"x": 0, "y": 12, "w": 16, "h": 10},
+      "targets": [
+        {
+          "expr": "{app=\"mochikorov\"}",
+          "datasource": "Loki"
+        }
+      ],
+      "options": {
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      }
+    }
+  ]
+}

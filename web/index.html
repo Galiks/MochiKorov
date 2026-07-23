@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мачи Коро</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <div id="session-screen" class="screen active">
+    <div class="session-container">
+      <h1>🎲 МАЧИ КОРО</h1>
+      <p class="subtitle">Градостроительная карточная игра</p>
+      <div class="session-list" id="session-list">
+        <h3>Загрузка сессий...</h3>
+      </div>
+      <div class="session-new">
+        <input type="text" id="new-session-id" placeholder="имя новой сессии">
+        <button id="btn-new-session">Создать</button>
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn-secondary" onclick="showCardModal()">🃏 Создать карту</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="game-screen" class="screen">
+    <header>
+      <div class="header-left">
+        <span class="game-title">🎲 МАЧИ КОРО</span>
+        <span class="session-badge" id="session-badge"></span>
+      </div>
+      <div class="header-right">
+        <span id="turn-display" class="turn-display">Ход 1</span>
+        <button id="btn-back" class="btn-small">← К сессиям</button>
+      </div>
+    </header>
+
+    <div id="start-prompt" class="start-prompt">
+      <h2>Новая игра</h2>
+      <button class="btn-primary" onclick="startGame()">🎮 Начать игру</button>
+    </div>
+
+    <div id="game-content" class="game-layout">
+      <aside class="panel-players" id="players-panel">
+        <h3>Игроки</h3>
+        <div id="players-list"></div>
+        <div id="player-hand" class="player-hand">
+          <h3 onclick="toggleHand()">🃏 Мои карты ▾</h3>
+          <div id="hand-content" style="display:none"></div>
+        </div>
+      </aside>
+
+      <main class="panel-center">
+        <div id="center-market">
+          <h3>Рынок</h3>
+          <div id="market-items"></div>
+          <h3>Достопримечательности</h3>
+          <div id="landmark-items"></div>
+        </div>
+        <div class="current-player-info" id="current-player-info">
+          <h2 id="current-name">Загрузка...</h2>
+          <div class="dice-area" id="dice-area">
+            <div class="dice-display" id="dice-display"></div>
+            <div class="actions" id="actions">
+              <button id="btn-roll" class="btn-primary">🎲 Бросить кубики</button>
+              <button id="btn-reroll" class="btn-secondary" style="display:none">🔄 Перебросить</button>
+              <button id="btn-continue" class="btn-primary" style="display:none">▶ Продолжить</button>
+              <button id="btn-skip" class="btn-secondary" style="display:none">⏭ Пропустить ход</button>
+            </div>
+            <div id="dice-switch" class="dice-switch" style="display:none">
+              <button id="btn-1dice" class="btn-dice active">1 кубик</button>
+              <button id="btn-2dice" class="btn-dice">2 кубика</button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <aside class="panel-logs" id="log-panel">
+        <h3>События</h3>
+        <div id="log-list"></div>
+      </aside>
+    </div>
+  </div>
+
+  <div id="card-creator-modal" class="modal-overlay" style="display:none">
+    <div class="modal-box">
+      <h1>Создание карты</h1>
+      <div class="cc-form">
+        <input id="cc-name" type="text" placeholder="Название карты">
+        <select id="cc-color">
+          <option value="Blue">🔵 Синяя</option>
+          <option value="Green">🟢 Зелёная</option>
+          <option value="Red">🔴 Красная</option>
+          <option value="Purple">🟣 Фиолетовая</option>
+        </select>
+        <input id="cc-dice" type="number" min="1" max="12" placeholder="Число на кубике">
+        <input id="cc-price" type="number" min="1" placeholder="Стоимость">
+        <input id="cc-reward" type="number" min="1" placeholder="Вознаграждение">
+        <input id="cc-stock" type="number" value="6" min="1" placeholder="Тираж">
+        <div class="cc-actions">
+          <button class="btn-primary" onclick="createCard()">Создать</button>
+          <button class="btn-small" onclick="closeCardModal()">Закрыть</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
