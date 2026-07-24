@@ -55,9 +55,6 @@ func NewServer(addr string, st store.Store) *Server {
 
 	web.RegisterGameRoutes(mux, st)
 
-	fs := http.FileServer(http.Dir("web"))
-	mux.Handle("GET /", fs)
-
 	return &Server{
 		httpServer: &http.Server{
 			Addr:    addr,

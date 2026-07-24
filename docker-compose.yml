@@ -1,12 +1,25 @@
 services:
-  app:
-    build: .
-    container_name: mochikorov-app
+  frontend:
+    build: ./frontend
+    container_name: mochikorov-frontend
     ports:
-      - "8080:8080"
+      - "8080:80"
+    networks:
+      - frontend-network
+      - backend-network
+    depends_on:
+      app:
+        condition: service_started
+    restart: unless-stopped
+
+  app:
+    build: ./backend
+    container_name: mochikorov-app
     environment:
       DATABASE_URL: postgres://mochikorov:mochikorov@postgres:5432/mochikorov
       LOKI_URL: http://loki:3100
+    networks:
+      - backend-network
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/sessions"]
       interval: 10s
@@ -28,6 +41,8 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U mochikorov -d mochikorov"]
       interval: 5s
@@ -37,10 +52,10 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: mochikorov-prometheus
-    ports:
-      - "9090:9090"
     volumes:
       - ./prometheus:/etc/prometheus
+    networks:
+      - backend-network
     depends_on:
       - app
     restart: unless-stopped
@@ -48,19 +63,19 @@ services:
   loki:
     image: grafana/loki:latest
     container_name: mochikorov-loki
-    ports:
-      - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - backend-network
     restart: unless-stopped
 
   grafana:
     image: grafana/grafana:latest
     container_name: mochikorov-grafana
-    ports:
-      - "3000:3000"
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/etc/grafana/dashboards
+    networks:
+      - backend-network
     depends_on:
       - prometheus
       - loki
@@ -69,11 +84,18 @@ services:
   adminer:
     image: adminer
     container_name: mochikorov-adminer
-    ports:
-      - "8081:8080"
+    networks:
+      - backend-network
     depends_on:
       postgres:
         condition: service_healthy
 
 volumes:
   pgdata:
+
+networks:
+  frontend-network:
+    driver: bridge
+  backend-network:
+    driver: bridge
+    internal: true
