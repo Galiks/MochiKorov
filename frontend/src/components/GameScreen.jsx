@@ -10,7 +10,20 @@ export default function GameScreen({ sessionId, onBack }) {
   const [gameState, setGameState] = useState(null)
   const [gameStarted, setGameStarted] = useState(false)
   const [eventLog, setEventLog] = useState([])
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
   const gameStateRef = useRef(gameState)
+  const errorTimerRef = useRef(null)
+
+  useEffect(() => {
+    if (error) {
+      if (errorTimerRef.current) clearTimeout(errorTimerRef.current)
+      errorTimerRef.current = setTimeout(() => setError(null), 5000)
+    }
+    return () => {
+      if (errorTimerRef.current) clearTimeout(errorTimerRef.current)
+    }
+  }, [error])
 
   useEffect(() => {
     gameStateRef.current = gameState
@@ -35,20 +48,26 @@ export default function GameScreen({ sessionId, onBack }) {
   }, [refreshGame])
 
   const startGame = useCallback(async () => {
+    setLoading(true)
     try {
-      const data = await api(`/api/game/${sessionId}/start?cards=base`, { method: 'POST' })
+      const data = await api(`/api/game/${sessionId}/start`, { method: 'POST' })
       setGameState(data)
       setGameStarted(true)
     } catch (e) {
-      alert(e.message)
+      setError(e.message)
+    } finally {
+      setLoading(false)
     }
   }, [sessionId])
+
+  const logIdRef = useRef(0)
 
   const updateState = useCallback(async ({ data, appendLog } = {}) => {
     if (data) {
       setGameState(data)
       if (data.log && data.log.length > 0) {
         setEventLog(prev => [...prev, ...data.log.map(msg => ({
+          id: ++logIdRef.current,
           text: msg,
           time: new Date().toLocaleTimeString('ru'),
         }))])
@@ -57,14 +76,16 @@ export default function GameScreen({ sessionId, onBack }) {
   }, [])
 
   const endTurnAndAI = useCallback(async (buyState) => {
-    await updateState({ data: buyState })
-    if (buyState.game_over) return
+    if (buyState.game_over) {
+      await updateState({ data: buyState })
+      return
+    }
 
     try {
       const data = await api(`/api/game/${sessionId}/end-turn`, { method: 'POST' })
       await updateState({ data })
     } catch (e) {
-      alert(e.message)
+      setError(e.message)
     }
   }, [sessionId, updateState])
 
@@ -77,6 +98,7 @@ export default function GameScreen({ sessionId, onBack }) {
   }, [sessionId, onBack])
 
   const handleRoll = useCallback(async (diceCount) => {
+    setLoading(true)
     try {
       let data = await api(`/api/game/${sessionId}/roll`, {
         method: 'POST',
@@ -88,11 +110,14 @@ export default function GameScreen({ sessionId, onBack }) {
         await updateState({ data: cd })
       }
     } catch (e) {
-      alert(e.message)
+      setError(e.message)
+    } finally {
+      setLoading(false)
     }
   }, [sessionId, updateState])
 
   const handleReroll = useCallback(async (selectedDice) => {
+    setLoading(true)
     try {
       const data = await api(`/api/game/${sessionId}/reroll`, {
         method: 'POST',
@@ -100,20 +125,26 @@ export default function GameScreen({ sessionId, onBack }) {
       })
       await updateState({ data })
     } catch (e) {
-      alert(e.message)
+      setError(e.message)
+    } finally {
+      setLoading(false)
     }
   }, [sessionId, updateState])
 
   const handleContinue = useCallback(async () => {
+    setLoading(true)
     try {
       const data = await api(`/api/game/${sessionId}/collect`, { method: 'POST' })
       await updateState({ data })
     } catch (e) {
-      alert(e.message)
+      setError(e.message)
+    } finally {
+      setLoading(false)
     }
   }, [sessionId, updateState])
 
   const handleBuyMarket = useCallback(async (cardId) => {
+    setLoading(true)
     try {
       const data = await api(`/api/game/${sessionId}/buy`, {
         method: 'POST',
@@ -121,11 +152,14 @@ export default function GameScreen({ sessionId, onBack }) {
       })
       await endTurnAndAI(data)
     } catch (e) {
-      alert(e.message)
+      setError(e.message)
+    } finally {
+      setLoading(false)
     }
   }, [sessionId, endTurnAndAI])
 
   const handleBuyLandmark = useCallback(async (index) => {
+    setLoading(true)
     try {
       const data = await api(`/api/game/${sessionId}/buy`, {
         method: 'POST',
@@ -133,11 +167,14 @@ export default function GameScreen({ sessionId, onBack }) {
       })
       await endTurnAndAI(data)
     } catch (e) {
-      alert(e.message)
+      setError(e.message)
+    } finally {
+      setLoading(false)
     }
   }, [sessionId, endTurnAndAI])
 
   const handleSkip = useCallback(async () => {
+    setLoading(true)
     try {
       const data = await api(`/api/game/${sessionId}/buy`, {
         method: 'POST',
@@ -145,12 +182,16 @@ export default function GameScreen({ sessionId, onBack }) {
       })
       await endTurnAndAI(data)
     } catch (e) {
-      alert(e.message)
+      setError(e.message)
+    } finally {
+      setLoading(false)
     }
   }, [sessionId, endTurnAndAI])
 
   return (
     <div className="game-screen">
+      {error && <div className="error-banner">{error}</div>}
+      {loading && <div className="loading-overlay"><div className="spinner" /></div>}
       <header>
         <div className="header-left">
           <span className="game-title">МАЧИ КОРО</span>
@@ -196,7 +237,7 @@ export default function GameScreen({ sessionId, onBack }) {
       ) : null}
 
       {gameState?.winner && (
-        <WinnerOverlay winner={gameState.winner} />
+        <WinnerOverlay winner={gameState.winner} onClose={onBack} />
       )}
     </div>
   )

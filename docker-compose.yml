@@ -52,6 +52,8 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: mochikorov-prometheus
+    ports:
+      - "9090:9090"
     volumes:
       - ./prometheus:/etc/prometheus
     networks:
@@ -63,6 +65,8 @@ services:
   loki:
     image: grafana/loki:latest
     container_name: mochikorov-loki
+    ports:
+      - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - backend-network
@@ -71,6 +75,8 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: mochikorov-grafana
+    ports:
+      - "3000:3000"
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/etc/grafana/dashboards
@@ -84,6 +90,8 @@ services:
   adminer:
     image: adminer
     container_name: mochikorov-adminer
+    ports:
+      - "8081:8080"
     networks:
       - backend-network
     depends_on:

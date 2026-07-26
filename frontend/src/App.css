@@ -1,18 +1,26 @@
 :root {
-  --bg: #1a1a2e;
-  --bg2: #16213e;
-  --bg3: #0f3460;
-  --text: #e0e0e0;
-  --text2: #a0a0b0;
-  --accent: #e94560;
+  --bg: #1a2e1a;
+  --bg2: #243824;
+  --bg3: #2d4a2d;
+  --board-bg: #1e5a3a;
+  --wood: #5c3a1e;
+  --wood-light: #8b5e3c;
+  --text: #e8e0d0;
+  --text2: #a8a090;
+  --accent: #d4a017;
+  --accent-hover: #e8b830;
   --green: #2ecc71;
   --blue: #3498db;
   --red: #e74c3c;
   --purple: #9b59b6;
-  --gold: #f1c40f;
-  --card-bg: #1e2a45;
-  --card-border: #2a3f5f;
+  --gold: #ffd700;
+  --card-bg: #f5f0e0;
+  --card-text: #2c1810;
+  --card-text2: #6b5a4e;
+  --card-border: #c8b898;
   --radius: 8px;
+  --card-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  --board-shadow: inset 0 0 40px rgba(0,0,0,0.3);
 }
 
 * {
@@ -22,8 +30,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg);
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: radial-gradient(ellipse at center, #1e4a2e 0%, #0d1f15 100%);
   color: var(--text);
   min-height: 100vh;
 }
@@ -34,6 +42,66 @@ body {
   padding: 20px;
 }
 
+.error-banner {
+  background: linear-gradient(180deg, #c0392b, #a93226);
+  color: white;
+  text-align: center;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  animation: fadeIn 0.3s;
+  border-bottom: 2px solid #922b21;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--text2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes diceDrop {
+  0% { transform: translateY(-40px) scale(0.5); opacity: 0; }
+  60% { transform: translateY(4px) scale(1.05); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes cardDeal {
+  from { transform: scale(0.8) rotate(-5deg); opacity: 0; }
+  to { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+@keyframes turnGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.5); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 button {
   padding: 10px 20px;
   border: none;
@@ -41,28 +109,37 @@ button {
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 600;
-  transition: opacity 0.2s, transform 0.1s;
+  transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
-button:hover { opacity: 0.9; }
-button:active { transform: scale(0.97); }
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+button:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
 
 .btn-primary {
-  background: var(--accent);
-  color: white;
+  background: linear-gradient(180deg, var(--accent-hover), var(--accent));
+  color: #2c1810;
+  border: 1px solid var(--wood-light);
 }
 
 .btn-secondary {
-  background: var(--bg3);
+  background: linear-gradient(180deg, var(--bg3), var(--bg2));
   color: var(--text);
-  border: 1px solid var(--card-border);
+  border: 1px solid var(--wood);
 }
 
 .btn-small {
-  background: var(--bg3);
+  background: var(--bg2);
   color: var(--text2);
   padding: 6px 14px;
   font-size: 0.85rem;
+  border: 1px solid var(--wood);
 }
 
 /* Session Screen */
@@ -74,12 +151,14 @@ button:active { transform: scale(0.97); }
 }
 
 .session-container {
-  background: var(--bg2);
+  background: linear-gradient(180deg, var(--bg3), var(--bg2));
   padding: 40px;
   border-radius: 16px;
   width: 480px;
   max-width: 90vw;
   text-align: center;
+  border: 3px solid var(--wood);
+  box-shadow: var(--card-shadow);
 }
 
 .session-container h1 {
@@ -116,11 +195,15 @@ button:active { transform: scale(0.97); }
   border-radius: var(--radius);
   margin-bottom: 6px;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
+  color: var(--card-text);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .session-item:hover {
   border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
 .sess-name {
@@ -143,13 +226,14 @@ button:active { transform: scale(0.97); }
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
   background: var(--card-bg);
-  color: var(--text);
+  color: var(--card-text);
   font-size: 0.95rem;
 }
 
 .session-new input:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(212, 160, 23, 0.3);
 }
 
 /* Game Screen */
@@ -158,8 +242,9 @@ header {
   justify-content: space-between;
   align-items: center;
   padding: 12px 24px;
-  background: var(--bg2);
-  border-bottom: 1px solid var(--card-border);
+  background: linear-gradient(180deg, var(--bg2), var(--bg));
+  border-bottom: 2px solid var(--wood);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .header-left {
@@ -222,16 +307,31 @@ header {
 .panel-players,
 .panel-center,
 .panel-logs {
-  background: var(--bg2);
+  background: linear-gradient(180deg, var(--bg3), var(--bg2));
   border-radius: 12px;
   padding: 16px;
   overflow-y: auto;
+  border: 2px solid var(--wood);
+  box-shadow: var(--card-shadow);
 }
 
 .panel-center {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  border: 3px solid var(--wood);
+  box-shadow: var(--card-shadow), var(--board-shadow);
+  background: radial-gradient(ellipse at center, #1e6a3e, var(--board-bg));
+  position: relative;
+}
+
+.panel-center::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-radius: 8px;
+  pointer-events: none;
 }
 
 .panel-players h3,
@@ -245,8 +345,15 @@ header {
 }
 
 #center-market {
-  max-height: 50%;
+  max-height: 55%;
   overflow-y: auto;
+  padding-right: 4px;
+}
+
+.market-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 /* Player Cards */
@@ -256,12 +363,16 @@ header {
   border-radius: var(--radius);
   padding: 12px;
   margin-bottom: 8px;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
+  color: var(--card-text);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .player-card.active {
   border-color: var(--gold);
-  box-shadow: 0 0 10px rgba(241, 196, 15, 0.2);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.3), 0 2px 4px rgba(0,0,0,0.2);
+  transform: translateY(-1px);
+  animation: turnGlow 3s ease-in-out infinite;
 }
 
 .p-name {
@@ -289,21 +400,23 @@ header {
 }
 
 .mini-card {
-  display: inline-block;
-  width: 22px;
-  height: 30px;
-  border-radius: 3px;
-  font-size: 0.6rem;
-  text-align: center;
-  line-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 36px;
+  border-radius: 4px;
+  font-size: 0.65rem;
   color: #fff;
   font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.15);
 }
 
-.color-blue { background: var(--blue); }
-.color-green { background: var(--green); }
-.color-red { background: var(--red); }
-.color-purple { background: var(--purple); }
+.color-blue { background: linear-gradient(135deg, var(--blue), #2980b9); }
+.color-green { background: linear-gradient(135deg, var(--green), #27ae60); }
+.color-red { background: linear-gradient(135deg, var(--red), #c0392b); }
+.color-purple { background: linear-gradient(135deg, var(--purple), #8e44ad); }
 
 /* Player Hand */
 .player-hand {
@@ -322,13 +435,15 @@ header {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px;
+  padding: 6px 10px;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 4px;
+  border-radius: 6px;
   margin-bottom: 4px;
   font-size: 0.8rem;
   cursor: default;
+  color: var(--card-text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 
 .hand-card.purchased {
@@ -382,23 +497,40 @@ header {
 }
 
 .die {
-  width: 50px;
-  height: 50px;
-  background: white;
-  color: #1a1a2e;
-  border-radius: 10px;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(145deg, #ffffff, #f0ead8);
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.9), inset 0 -2px 0 rgba(0,0,0,0.05);
   transition: all 0.2s;
+  border: 1px solid #c8b898;
+  animation: diceDrop 0.4s ease-out;
+}
+
+.die-face {
+  position: relative;
+  width: 52px;
+  height: 52px;
+}
+
+.die-pip {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle at 35% 35%, #4a3a2a, #2c1810);
+  border-radius: 50%;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.3), 0 1px 1px rgba(255,255,255,0.3);
+  top: calc(var(--px) * (52px - 10px) / 2);
+  left: calc(var(--py) * (52px - 10px) / 2);
+  transform: none;
 }
 
 .die.selected {
   border: 3px solid var(--gold);
-  box-shadow: 0 0 12px rgba(241, 196, 15, 0.5);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.5), 0 4px 12px rgba(0,0,0,0.4);
   cursor: pointer;
 }
 
@@ -407,7 +539,8 @@ header {
 }
 
 .die.clickable:hover {
-  transform: scale(1.1);
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4);
 }
 
 .die-sum {
@@ -432,46 +565,121 @@ header {
 
 .btn-dice {
   padding: 4px 16px;
-  border: 1px solid var(--card-border);
+  border: 1px solid var(--wood);
   border-radius: var(--radius);
   background: var(--card-bg);
-  color: var(--text2);
+  color: var(--card-text2);
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .btn-dice.active {
-  background: var(--bg3);
-  color: var(--text);
-  border-color: var(--accent);
+  background: var(--accent);
+  color: #2c1810;
+  border-color: var(--accent-hover);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
 .btn-dice:hover {
   border-color: var(--accent);
+  transform: translateY(-1px);
 }
 
 .btn-dice:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  transform: none;
 }
 
 /* Market */
 .market-card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: var(--radius);
+  border-radius: 10px;
   padding: 10px;
-  margin-bottom: 6px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
+  gap: 4px;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
+  color: var(--card-text);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  text-align: center;
+  position: relative;
+  animation: cardDeal 0.35s ease-out backwards;
 }
+
+.market-card:nth-child(1) { animation-delay: 0.00s; }
+.market-card:nth-child(2) { animation-delay: 0.05s; }
+.market-card:nth-child(3) { animation-delay: 0.10s; }
+.market-card:nth-child(4) { animation-delay: 0.15s; }
+.market-card:nth-child(5) { animation-delay: 0.20s; }
+.market-card:nth-child(6) { animation-delay: 0.25s; }
+.market-card:nth-child(7) { animation-delay: 0.30s; }
+.market-card:nth-child(8) { animation-delay: 0.35s; }
 
 .market-card:hover {
   border-color: var(--accent);
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+
+.market-card .mc-badge {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1px 8px;
+  border-radius: 3px;
+  color: white;
+  font-weight: 600;
+  margin-bottom: 2px;
+  position: relative;
+  z-index: 1;
+}
+
+.market-card .mc-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  margin: 2px 0;
+}
+
+.market-card .mc-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.market-card .mc-meta {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.market-card .mc-price {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.market-card .mc-stock {
+  color: var(--card-text2);
+}
+
+.market-card .mc-dice {
+  font-size: 0.7rem;
+  color: var(--card-text2);
+}
+
+.market-card .mc-effect {
+  font-size: 0.68rem;
+  color: var(--card-text2);
+}
+
+.landmark-card {
+  border-color: var(--purple);
 }
 
 .mc-info {
@@ -504,9 +712,10 @@ header {
 /* Log */
 .log-entry {
   padding: 4px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   font-size: 0.85rem;
   color: var(--text2);
+  animation: slideUp 0.3s ease-out;
 }
 
 .log-entry:first-child {
@@ -519,6 +728,7 @@ header {
   font-size: 0.75rem;
   margin-right: 6px;
   font-family: monospace;
+  opacity: 0.7;
 }
 
 /* Winner Overlay */
@@ -533,11 +743,18 @@ header {
 }
 
 .winner-box {
-  background: var(--bg2);
+  background: linear-gradient(180deg, var(--bg3), var(--bg2));
   padding: 40px 60px;
   border-radius: 16px;
   text-align: center;
-  border: 2px solid var(--gold);
+  border: 3px solid var(--gold);
+  box-shadow: 0 0 40px rgba(255, 215, 0, 0.3), var(--card-shadow);
+  animation: winnerPulse 2s ease-in-out infinite;
+}
+
+@keyframes winnerPulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.3), var(--card-shadow); }
+  50% { box-shadow: 0 0 60px rgba(255, 215, 0, 0.5), var(--card-shadow); }
 }
 
 .winner-box h2 {
@@ -563,11 +780,13 @@ header {
 }
 
 .modal-box {
-  background: var(--bg2);
+  background: linear-gradient(180deg, var(--bg3), var(--bg2));
   padding: 30px 40px;
   border-radius: 16px;
   width: 400px;
   max-width: 90vw;
+  border: 3px solid var(--wood);
+  box-shadow: var(--card-shadow);
 }
 
 .modal-box h1 {
@@ -589,7 +808,7 @@ header {
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
   background: var(--card-bg);
-  color: var(--text);
+  color: var(--card-text);
   font-size: 0.95rem;
 }
 
@@ -597,6 +816,7 @@ header {
 .cc-form input:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(212, 160, 23, 0.3);
 }
 
 .cc-actions {

@@ -68,7 +68,6 @@ const (
 	EffectPerWheat       ActivationEffect = 7
 	EffectPerPurple      ActivationEffect = 8
 	EffectHalfOthers     ActivationEffect = 9
-	EffectPerPlayerFixed ActivationEffect = 10
 )
 
 type Card struct {

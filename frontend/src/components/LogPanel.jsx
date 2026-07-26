@@ -6,8 +6,8 @@ export default function LogPanel({ log }) {
         {log.length === 0 ? (
           <div className="loading">Ожидание действий...</div>
         ) : (
-          [...log].reverse().map((entry, i) => (
-            <div key={i} className="log-entry">
+          [...log].reverse().map(entry => (
+            <div key={entry.id} className="log-entry">
               <span className="log-time">{entry.time}</span> {entry.text}
             </div>
           ))

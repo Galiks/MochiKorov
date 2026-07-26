@@ -1,2 +1,14 @@
-.vscode
+# Environment
 .env
+
+# Dependencies
+frontend/node_modules/
+
+# Build output
+frontend/dist/
+backend/mochikorov.exe
+backend/mochikorov
+
+# OS
+.DS_Store
+Thumbs.db

@@ -56,7 +56,10 @@ func (h *handler) pushLog(sessionID string, turn, playerID int, actionType strin
 		}
 
 		body, _ := json.Marshal(payload)
-		http.Post(h.lokiURL+"/loki/api/v1/push", "application/json", bytes.NewReader(body))
+		resp, err := http.Post(h.lokiURL+"/loki/api/v1/push", "application/json", bytes.NewReader(body))
+		if err == nil {
+			resp.Body.Close()
+		}
 	}()
 }
 

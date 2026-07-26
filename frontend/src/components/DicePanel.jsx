@@ -1,5 +1,34 @@
 import { useState } from 'react'
 
+const pipPositions = {
+  1: [[1, 1]],
+  2: [[0, 2], [2, 0]],
+  3: [[0, 2], [1, 1], [2, 0]],
+  4: [[0, 0], [0, 2], [2, 0], [2, 2]],
+  5: [[0, 0], [0, 2], [1, 1], [2, 0], [2, 2]],
+  6: [[0, 0], [0, 2], [1, 0], [1, 2], [2, 0], [2, 2]],
+}
+
+function DieFace({ value, selected, clickable, onClick }) {
+  const pips = pipPositions[value] || []
+  return (
+    <div
+      className={`die${selected ? ' selected' : ''}${clickable ? ' clickable' : ''}`}
+      onClick={onClick}
+    >
+      <div className="die-face">
+        {pips.map((pos, i) => (
+          <div
+            key={i}
+            className="die-pip"
+            style={{ '--px': pos[0], '--py': pos[1] }}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function DicePanel({ state, onRoll, onReroll, onContinue, onSkip }) {
   const [diceCount, setDiceCount] = useState(1)
   const [selectedDice, setSelectedDice] = useState([])
@@ -37,13 +66,13 @@ export default function DicePanel({ state, onRoll, onReroll, onContinue, onSkip 
               {state.dice.numbers.map((n, i) => {
                 const isSel = selectedDice.includes(i)
                 return (
-                  <div
+                  <DieFace
                     key={i}
-                    className={`die${isSel ? ' selected' : ''}${isRerollPhase ? ' clickable' : ''}`}
+                    value={n}
+                    selected={isSel}
+                    clickable={isRerollPhase}
                     onClick={() => isRerollPhase && toggleDie(i)}
-                  >
-                    {n}
-                  </div>
+                  />
                 )
               })}
               <div className="die-sum">
