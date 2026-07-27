@@ -22,10 +22,10 @@ function groupCardsByColor(cards) {
   return byColor
 }
 
-export default function PlayerList({ players, state }) {
+export default function PlayerList({ players, state, yourID }) {
   const [handVisible, setHandVisible] = useState(false)
   const [collapsedColors, setCollapsedColors] = useState(new Set())
-  const human = players.find(p => p.id === 0)
+  const myPlayer = players.find(p => p.id === yourID)
 
   const toggleColor = (color) => {
     setCollapsedColors(prev => {
@@ -41,7 +41,7 @@ export default function PlayerList({ players, state }) {
     const grouped = groupCards(cards)
     return (
       <div key={p.id} className={`player-card ${p.is_current ? 'active' : ''}`}>
-        <div className="p-name">{p.is_current ? '▶ ' : ''}{p.name}</div>
+        <div className="p-name">{p.is_current ? '▶ ' : ''}{p.name}{p.id === yourID ? ' (это вы)' : ''}</div>
         <div className="p-money">💰 {p.money} монет</div>
         <div className="p-stats">
           🏛️ {p.landmark_count}/{state?.total_landmarks || 7} · 🃏 {cards.length} карт
@@ -75,7 +75,7 @@ export default function PlayerList({ players, state }) {
         {players.map(renderPlayerSummary)}
       </div>
 
-      {human && (
+      {myPlayer && (
         <div className="player-hand">
           <h3 onClick={() => setHandVisible(!handVisible)}>
             🃏 Мои карты {handVisible ? '▴' : '▾'}
@@ -83,7 +83,7 @@ export default function PlayerList({ players, state }) {
           {handVisible && (
             <div>
               {(() => {
-                const byColor = groupCardsByColor(human.cards || [])
+                const byColor = groupCardsByColor(myPlayer.cards || [])
                 return COLOR_ORDER.map(colorName => {
                   const colorGroups = byColor[colorName]
                   if (!colorGroups || Object.keys(colorGroups).length === 0) return null
@@ -105,7 +105,7 @@ export default function PlayerList({ players, state }) {
                         <div className="hand-cards-grid">
                           {Object.values(colorGroups).map((g) => {
                             const c = g.card
-                            const isDeactivated = c.min_landmark > 0 && human.landmark_count < c.min_landmark
+                            const isDeactivated = c.min_landmark > 0 && myPlayer.landmark_count < c.min_landmark
                             const tip = `${c.name} | 🎲${(c.numbers || []).join(',')} | 💰${c.price} | ${EFFECT_NAMES[c.effect_type] || 'доход'} +${c.effect_value}`
                             return (
                               <div
@@ -125,7 +125,7 @@ export default function PlayerList({ players, state }) {
                   )
                 })
               })()}
-              {human.landmarks && human.landmarks.map((lm) =>
+              {myPlayer.landmarks && myPlayer.landmarks.map((lm) =>
                 lm.price > 0 ? (
                   <div key={lm.id} className="hand-card purchased">
                     🏛️ {lm.name} ✔

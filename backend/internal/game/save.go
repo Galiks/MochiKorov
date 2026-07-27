@@ -23,6 +23,7 @@ type SavePlayer struct {
 	Money     int    `json:"money"`
 	Cards     []Card `json:"cards"`
 	Landmarks []Card `json:"landmarks"`
+	IsHuman   bool   `json:"is_human"`
 }
 
 type SaveMarket struct {
@@ -46,6 +47,7 @@ func (g *Game) ToSaveData() *SaveData {
 			Money:     p.Money,
 			Cards:     p.Cards,
 			Landmarks: p.Landmarks,
+			IsHuman:   p.IsHuman,
 		})
 	}
 	for _, m := range g.Market {
@@ -65,6 +67,7 @@ func GameFromSaveData(sd *SaveData) *Game {
 			Money:     sp.Money,
 			Cards:     sp.Cards,
 			Landmarks: sp.Landmarks,
+			IsHuman:   sp.IsHuman,
 		}
 	}
 

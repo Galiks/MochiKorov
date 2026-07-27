@@ -5,8 +5,11 @@ import (
 )
 
 func newTestGame() *Game {
-	g := NewGame([]string{"Игрок", "Бот 1", "Бот 2"})
-	return g
+	return NewGame([]PlayerDef{
+		{Name: "Игрок", IsHuman: true},
+		{Name: "Бот 1", IsHuman: false},
+		{Name: "Бот 2", IsHuman: false},
+	})
 }
 
 func setDice(g *Game, nums ...int) {
@@ -37,13 +40,13 @@ func TestNewGame(t *testing.T) {
 func TestNewGameBotsStartWithWheat(t *testing.T) {
 	g := newTestGame()
 	for _, p := range g.Players {
-		if p.ID == 0 {
+		if p.IsHuman {
 			if len(p.Cards) != 0 {
 				t.Fatalf("human should start with 0 cards, got %d", len(p.Cards))
 			}
 		} else {
 			if len(p.Cards) != 1 || p.Cards[0].ID != "wheat_field" {
-				t.Fatalf("bot %d should start with 1 wheat_field, got %v", p.ID, p.Cards)
+				t.Fatalf("bot %s should start with 1 wheat_field, got %v", p.Name, p.Cards)
 			}
 		}
 	}
@@ -479,7 +482,7 @@ func TestCheckWinNotYet(t *testing.T) {
 }
 
 func TestRemoveMoneyPartial(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	p.Money = 3
 
 	taken := p.RemoveMoney(5)
@@ -492,7 +495,7 @@ func TestRemoveMoneyPartial(t *testing.T) {
 }
 
 func TestRemoveMoneyFull(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	p.Money = 10
 
 	taken := p.RemoveMoney(5)
@@ -505,7 +508,7 @@ func TestRemoveMoneyFull(t *testing.T) {
 }
 
 func TestCanRerollWithLandmark(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	if p.CanReroll() {
 		t.Fatal("should not be able to reroll without landmark")
 	}
@@ -519,7 +522,7 @@ func TestCanRerollWithLandmark(t *testing.T) {
 }
 
 func TestCanRollTwoDiceWithLandmark(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	if p.CanRollTwoDice() {
 		t.Fatal("should not be able to roll 2 dice without landmark")
 	}

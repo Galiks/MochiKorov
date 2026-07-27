@@ -12,3 +12,5 @@ backend/mochikorov
 # OS
 .DS_Store
 Thumbs.db
+.vscode/settings.json
+.vscode/settings.json

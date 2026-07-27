@@ -26,15 +26,20 @@ type Game struct {
 	winner        *Player
 }
 
+type PlayerDef struct {
+	Name    string
+	IsHuman bool
+}
+
 type MarketCard struct {
 	Card  Card `json:"card"`
 	Count int  `json:"count"`
 }
 
-func NewGame(playerNames []string) *Game {
-	players := make([]*Player, len(playerNames))
-	for i, name := range playerNames {
-		players[i] = NewPlayer(i, name)
+func NewGame(defs []PlayerDef) *Game {
+	players := make([]*Player, len(defs))
+	for i, def := range defs {
+		players[i] = NewPlayer(i, def.Name, def.IsHuman)
 	}
 
 	g := &Game{
@@ -46,7 +51,7 @@ func NewGame(playerNames []string) *Game {
 	}
 
 	for _, p := range g.Players {
-		if p.ID == 0 {
+		if p.IsHuman {
 			continue
 		}
 		giveFreeCard(g.Market, "wheat_field", p)

@@ -5,7 +5,7 @@ import (
 )
 
 func TestNewPlayer(t *testing.T) {
-	p := NewPlayer(0, "Тест")
+	p := NewPlayer(0, "Тест", true)
 	if p.ID != 0 {
 		t.Fatalf("expected ID 0, got %d", p.ID)
 	}
@@ -24,7 +24,7 @@ func TestNewPlayer(t *testing.T) {
 }
 
 func TestAddMoney(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := NewPlayer(0, "Test", true)
 	p.AddMoney(5)
 	if p.Money != 8 {
 		t.Fatalf("expected 8 (3+5), got %d", p.Money)
@@ -32,7 +32,7 @@ func TestAddMoney(t *testing.T) {
 }
 
 func TestRemoveMoneyEnough(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	p.Money = 10
 	taken := p.RemoveMoney(4)
 	if taken != 4 {
@@ -44,7 +44,7 @@ func TestRemoveMoneyEnough(t *testing.T) {
 }
 
 func TestRemoveMoneyNotEnough(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	p.Money = 3
 	taken := p.RemoveMoney(10)
 	if taken != 3 {
@@ -56,7 +56,7 @@ func TestRemoveMoneyNotEnough(t *testing.T) {
 }
 
 func TestRemoveMoneyZero(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	p.Money = 0
 	taken := p.RemoveMoney(5)
 	if taken != 0 {
@@ -68,7 +68,7 @@ func TestRemoveMoneyZero(t *testing.T) {
 }
 
 func TestCanAfford(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	p.Money = 5
 
 	if !p.CanAfford(5) {
@@ -83,7 +83,7 @@ func TestCanAfford(t *testing.T) {
 }
 
 func TestCanAffordZero(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	p.Money = 0
 
 	if p.CanAfford(1) {
@@ -92,7 +92,7 @@ func TestCanAffordZero(t *testing.T) {
 }
 
 func TestBuyCard(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	p.Money = 10
 	card := Card{ID: "bakery", Name: "Пекарня", Price: 1}
 
@@ -107,7 +107,7 @@ func TestBuyCard(t *testing.T) {
 }
 
 func TestPlayerBuyLandmark(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	p.Money = 20
 	lm := Card{ID: "shopping_mall", Name: string(LandmarkShoppingMall), Price: 10, Type: TypeLandmark}
 
@@ -129,7 +129,7 @@ func TestPlayerBuyLandmark(t *testing.T) {
 }
 
 func TestHasShoppingMall(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	if p.HasShoppingMall() {
 		t.Fatal("should not have shopping mall initially")
 	}
@@ -143,7 +143,7 @@ func TestHasShoppingMall(t *testing.T) {
 }
 
 func TestCountLandmarks(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	if p.CountLandmarks() != 0 {
 		t.Fatalf("expected 0 paid landmarks (city hall is free), got %d", p.CountLandmarks())
 	}
@@ -157,7 +157,7 @@ func TestCountLandmarks(t *testing.T) {
 }
 
 func TestCountCardsByID(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	p.Cards = []Card{
 		{ID: "wheat_field"},
 		{ID: "bakery"},
@@ -176,7 +176,7 @@ func TestCountCardsByID(t *testing.T) {
 }
 
 func TestOwnsLandmarkNamed(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	if p.OwnsLandmarkNamed(string(LandmarkHarbor)) {
 		t.Fatal("should not own harbor initially")
 	}
@@ -190,7 +190,7 @@ func TestOwnsLandmarkNamed(t *testing.T) {
 }
 
 func TestCanRollTwoDiceTrainStation(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	p.Landmarks = append(p.Landmarks,
 		Card{ID: "train_station", Name: string(LandmarkTrainStation), Price: 4, Type: TypeLandmark},
 	)
@@ -200,7 +200,7 @@ func TestCanRollTwoDiceTrainStation(t *testing.T) {
 }
 
 func TestCanRerollRadioTower(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	p.Landmarks = append(p.Landmarks,
 		Card{ID: "radio_tower", Name: string(LandmarkRadioTower), Price: 22, Type: TypeLandmark},
 	)
@@ -210,7 +210,7 @@ func TestCanRerollRadioTower(t *testing.T) {
 }
 
 func TestCanRerollAirport(t *testing.T) {
-	p := NewPlayer(0, "Test")
+	p := 	NewPlayer(0, "Test", true)
 	p.Landmarks = append(p.Landmarks,
 		Card{ID: "airport", Name: string(LandmarkAirport), Price: 30, Type: TypeLandmark},
 	)

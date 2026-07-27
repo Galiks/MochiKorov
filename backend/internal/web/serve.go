@@ -16,4 +16,8 @@ func RegisterGameRoutes(mux *http.ServeMux, st store.Store) {
 	mux.HandleFunc("POST /api/game/{id}/reroll", h.handleReroll)
 	mux.HandleFunc("POST /api/game/{id}/buy", h.handleBuy)
 	mux.HandleFunc("POST /api/game/{id}/end-turn", h.handleEndTurn)
+
+	mux.HandleFunc("GET /api/sessions/{id}/lobby", h.handleLobbyState)
+	mux.HandleFunc("POST /api/sessions/{id}/lobby/join", h.handleLobbyJoin)
+	mux.HandleFunc("DELETE /api/sessions/{id}/lobby/leave/{idx}", h.handleLobbyLeave)
 }

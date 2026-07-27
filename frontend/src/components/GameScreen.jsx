@@ -5,6 +5,7 @@ import MarketPanel from './MarketPanel'
 import PlayerList from './PlayerList'
 import LogPanel from './LogPanel'
 import WinnerOverlay from './WinnerOverlay'
+import LobbyScreen from './LobbyScreen'
 
 export default function GameScreen({ sessionId, onBack }) {
   const [gameState, setGameState] = useState(null)
@@ -35,7 +36,7 @@ export default function GameScreen({ sessionId, onBack }) {
       setGameState(data)
       setGameStarted(true)
     } catch (e) {
-      if (e.message === 'no game data in session ' + sessionId) {
+      if (e.message.includes('no game data') || e.message.includes('not found')) {
         setGameStarted(false)
         return
       }
@@ -46,19 +47,6 @@ export default function GameScreen({ sessionId, onBack }) {
   useEffect(() => {
     refreshGame()
   }, [refreshGame])
-
-  const startGame = useCallback(async () => {
-    setLoading(true)
-    try {
-      const data = await api(`/api/game/${sessionId}/start`, { method: 'POST' })
-      setGameState(data)
-      setGameStarted(true)
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }, [sessionId])
 
   const logIdRef = useRef(0)
 
@@ -188,6 +176,15 @@ export default function GameScreen({ sessionId, onBack }) {
     }
   }, [sessionId, endTurnAndAI])
 
+  const handleGameStart = useCallback((data) => {
+    setGameState(data)
+    setGameStarted(true)
+  }, [])
+
+  if (!gameStarted) {
+    return <LobbyScreen sessionId={sessionId} onGameStart={handleGameStart} />
+  }
+
   return (
     <div className="game-screen">
       {error && <div className="error-banner">{error}</div>}
@@ -205,16 +202,12 @@ export default function GameScreen({ sessionId, onBack }) {
         </div>
       </header>
 
-      {!gameStarted ? (
-        <div className="start-prompt">
-          <h2>Новая игра</h2>
-          <button className="btn-primary" onClick={startGame}>🎮 Начать игру</button>
-        </div>
-      ) : gameState ? (
+      {gameState ? (
         <div className="game-layout">
           <PlayerList
             players={gameState.players}
             state={gameState}
+            yourID={gameState.your_id}
           />
 
           <main className="panel-center">

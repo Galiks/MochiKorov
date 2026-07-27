@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -18,7 +19,7 @@ type Server struct {
 	store      store.Store
 }
 
-func NewServer(addr string, st store.Store) *Server {
+func NewServer(addr string, st store.Store, distDir string) *Server {
 	metrics.Register()
 
 	mux := http.NewServeMux()
@@ -55,6 +56,27 @@ func NewServer(addr string, st store.Store) *Server {
 
 	web.RegisterGameRoutes(mux, st)
 
+	if info, err := os.Stat(distDir); err == nil && info.IsDir() {
+		fileServer := http.FileServer(http.Dir(distDir))
+		mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/" {
+				http.ServeFile(w, r, distDir+"/index.html")
+				return
+			}
+			path := distDir + r.URL.Path
+			if _, err := os.Stat(path); os.IsNotExist(err) {
+				http.ServeFile(w, r, distDir+"/index.html")
+				return
+			}
+			fileServer.ServeHTTP(w, r)
+		})
+	} else {
+		mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			w.Write([]byte("MochiKorov API server. Frontend not found. Build it with: cd frontend && npm run build"))
+		})
+	}
+
 	return &Server{
 		httpServer: &http.Server{
 			Addr:    addr,
@@ -79,7 +101,7 @@ func withCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Player-Token")
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return

@@ -57,6 +57,8 @@ func (s *PostgresStore) migrate(ctx context.Context) error {
 			completed BOOLEAN NOT NULL DEFAULT FALSE
 		)`,
 		`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS completed BOOLEAN NOT NULL DEFAULT FALSE`,
+		`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS max_players INTEGER NOT NULL DEFAULT 2`,
+		`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS lobby_players JSONB DEFAULT '[]'::jsonb`,
 		`CREATE TABLE IF NOT EXISTS card_sets (
 			id TEXT PRIMARY KEY,
 			name TEXT NOT NULL,
@@ -103,7 +105,8 @@ func (s *PostgresStore) SeedDefaults() error {
 func scanSession(row pgx.Row) (*Session, error) {
 	var s Session
 	var gameData []byte
-	err := row.Scan(&s.ID, &s.Name, &s.CreatedAt, &s.UpdatedAt, &gameData, &s.Completed)
+	var lobbyPlayersJSON []byte
+	err := row.Scan(&s.ID, &s.Name, &s.CreatedAt, &s.UpdatedAt, &gameData, &s.Completed, &s.MaxPlayers, &lobbyPlayersJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -113,13 +116,18 @@ func scanSession(row pgx.Row) (*Session, error) {
 			s.GameData = &sd
 		}
 	}
+	if lobbyPlayersJSON != nil {
+		json.Unmarshal(lobbyPlayersJSON, &s.LobbyPlayers)
+	}
 	return &s, nil
 }
+
+const sessionCols = "id, name, created_at, updated_at, game_data, completed, max_players, lobby_players"
 
 func (s *PostgresStore) ListSessions() ([]Session, error) {
 	ctx := context.Background()
 	rows, err := s.pool.Query(ctx,
-		`SELECT id, name, created_at, updated_at, game_data, completed FROM sessions ORDER BY updated_at DESC`,
+		`SELECT `+sessionCols+` FROM sessions ORDER BY updated_at DESC`,
 	)
 	if err != nil {
 		return nil, err
@@ -137,19 +145,21 @@ func (s *PostgresStore) ListSessions() ([]Session, error) {
 	return result, nil
 }
 
-func (s *PostgresStore) CreateSession(id, name string) (*Session, error) {
+func (s *PostgresStore) CreateSession(id, name string, maxPlayers int, creatorToken string) (*Session, error) {
 	ctx := context.Background()
 	now := time.Now()
+	creator := LobbyPlayer{Name: name, Token: creatorToken}
+	lobbyJSON, _ := json.Marshal([]LobbyPlayer{creator})
 	_, err := s.pool.Exec(ctx,
-		`INSERT INTO sessions (id, name, created_at, updated_at) VALUES ($1, $2, $3, $4)`,
-		id, name, now, now,
+		`INSERT INTO sessions (id, name, created_at, updated_at, max_players, lobby_players) VALUES ($1, $2, $3, $4, $5, $6)`,
+		id, name, now, now, maxPlayers, lobbyJSON,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create session: %w", err)
 	}
 
 	row := s.pool.QueryRow(ctx,
-		`SELECT id, name, created_at, updated_at, game_data, completed FROM sessions WHERE id = $1`, id,
+		`SELECT `+sessionCols+` FROM sessions WHERE id = $1`, id,
 	)
 	return scanSession(row)
 }
@@ -157,7 +167,7 @@ func (s *PostgresStore) CreateSession(id, name string) (*Session, error) {
 func (s *PostgresStore) GetSession(id string) (*Session, error) {
 	ctx := context.Background()
 	row := s.pool.QueryRow(ctx,
-		`SELECT id, name, created_at, updated_at, game_data, completed FROM sessions WHERE id = $1`, id,
+		`SELECT `+sessionCols+` FROM sessions WHERE id = $1`, id,
 	)
 	sess, err := scanSession(row)
 	if err != nil {
@@ -167,6 +177,25 @@ func (s *PostgresStore) GetSession(id string) (*Session, error) {
 		return nil, err
 	}
 	return sess, nil
+}
+
+func (s *PostgresStore) SaveLobbyPlayers(id string, players []LobbyPlayer) error {
+	ctx := context.Background()
+	raw, err := json.Marshal(players)
+	if err != nil {
+		return fmt.Errorf("marshal lobby: %w", err)
+	}
+	tag, err := s.pool.Exec(ctx,
+		`UPDATE sessions SET lobby_players = $1, updated_at = NOW() WHERE id = $2`,
+		raw, id,
+	)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return fmt.Errorf("session not found: %s", id)
+	}
+	return nil
 }
 
 func (s *PostgresStore) DeleteSession(id string) error {

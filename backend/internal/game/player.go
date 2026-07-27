@@ -6,13 +6,15 @@ type Player struct {
 	Money     int
 	Cards     []Card
 	Landmarks []Card
+	IsHuman   bool
 }
 
-func NewPlayer(id int, name string) *Player {
+func NewPlayer(id int, name string, isHuman bool) *Player {
 	return &Player{
-		ID:    id,
-		Name:  name,
-		Money: 3,
+		ID:      id,
+		Name:    name,
+		Money:   3,
+		IsHuman: isHuman,
 		Landmarks: []Card{
 			{ID: "city_hall", Name: string(LandmarkCityHall), Price: 0, Type: TypeLandmark},
 		},

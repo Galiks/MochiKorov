@@ -7,6 +7,7 @@ type PlayerState struct {
 	Cards            []Card `json:"cards"`
 	Landmarks        []Card `json:"landmarks"`
 	IsCurrent        bool   `json:"is_current"`
+	IsHuman          bool   `json:"is_human"`
 	LandmarkCount    int    `json:"landmark_count"`
 	CanRollTwoDice   bool   `json:"can_roll_two_dice"`
 	CanReroll        bool   `json:"can_reroll"`
@@ -29,6 +30,7 @@ type GameStateResponse struct {
 	CanBuy             bool           `json:"can_buy"`
 	GameOver           bool           `json:"game_over"`
 	TotalLandmarks     int            `json:"total_landmarks"`
+	YourID             int            `json:"your_id"`
 }
 
 func toPlayerState(p *Player, currentID int) PlayerState {
@@ -39,6 +41,7 @@ func toPlayerState(p *Player, currentID int) PlayerState {
 		Cards:          p.Cards,
 		Landmarks:      p.Landmarks,
 		IsCurrent:      p.ID == currentID,
+		IsHuman:        p.IsHuman,
 		LandmarkCount:  p.CountLandmarks(),
 		CanRollTwoDice: p.CanRollTwoDice(),
 		CanReroll:      p.CanReroll(),
@@ -46,7 +49,7 @@ func toPlayerState(p *Player, currentID int) PlayerState {
 	}
 }
 
-func (g *Game) ToStateResponse(sessionID string, log []string) *GameStateResponse {
+func (g *Game) ToStateResponse(sessionID string, log []string, yourID int) *GameStateResponse {
 	players := make([]PlayerState, len(g.Players))
 	for i, p := range g.Players {
 		players[i] = toPlayerState(p, g.CurrentPlayer)
@@ -72,7 +75,7 @@ func (g *Game) ToStateResponse(sessionID string, log []string) *GameStateRespons
 		phase = "end"
 	}
 
-	isHuman := g.CurrentPlayer == 0
+	isHuman := g.Current().IsHuman
 	canRoll := g.Phase == PhaseRoll && isHuman
 	canReroll := g.Phase == PhaseIncome && isHuman && g.Current().CanReroll() && g.DiceResult.Sum > 0
 	canBuy := g.Phase == PhaseBuy && isHuman && winner == nil
@@ -98,5 +101,6 @@ func (g *Game) ToStateResponse(sessionID string, log []string) *GameStateRespons
 		CanBuy:             canBuy,
 		GameOver:           winner != nil,
 		TotalLandmarks:     len(AllLandmarks()),
+		YourID:             yourID,
 	}
 }

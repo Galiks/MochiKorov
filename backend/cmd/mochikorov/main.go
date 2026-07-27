@@ -24,18 +24,30 @@ func main() {
 		dsnDefault = "postgres://mochikorov:mochikorov@localhost:5432/mochikorov"
 	}
 
-	mode := flag.String("mode", "cli", "run mode: cli or server")
+	mode := flag.String("mode", "server", "run mode: cli or server")
 	addr := flag.String("addr", ":8080", "server address (used with -mode server)")
 	sessionName := flag.String("session", "", "session name for CLI mode")
 	cardSetName := flag.String("cards", "base", "card set name")
 	dsn := flag.String("dsn", dsnDefault, "PostgreSQL DSN")
+	storeType := flag.String("store", "file", "store type: file or postgres")
+	dataDir := flag.String("data", "./data", "data directory (file store)")
+	distDir := flag.String("dist", "./dist", "frontend dist directory")
 	flag.Parse()
 
-	st, err := store.NewPostgresStore(context.Background(), *dsn)
-	if err != nil {
-		log.Fatalf("Failed to connect to storage: %v", err)
+	var st store.Store
+	switch *storeType {
+	case "file":
+		st = store.NewFileStore(*dataDir)
+	case "postgres":
+		var err error
+		st, err = store.NewPostgresStore(context.Background(), *dsn)
+		if err != nil {
+			log.Fatalf("Failed to connect to storage: %v", err)
+		}
+		defer st.Close()
+	default:
+		log.Fatalf("unknown store type: %s (use file or postgres)", *storeType)
 	}
-	defer st.Close()
 
 	if err := st.SeedDefaults(); err != nil {
 		log.Printf("Warning: seed defaults: %v", err)
@@ -45,7 +57,7 @@ func main() {
 
 	switch *mode {
 	case "server":
-		svr := api.NewServer(*addr, st)
+		svr := api.NewServer(*addr, st, *distDir)
 		if err := svr.Start(); err != nil {
 			fmt.Fprintf(os.Stderr, "Server error: %v\n", err)
 			os.Exit(1)
@@ -90,11 +102,16 @@ func main() {
 	}
 
 	if g == nil {
-		_, err := st.CreateSession(sessID, sessID)
+		_, err := st.CreateSession(sessID, sessID, 4, "")
 		if err != nil {
 			log.Printf("Warning: create session: %v", err)
 		}
-		g = game.NewGame([]string{"Игрок", "Бот 1", "Бот 2", "Бот 3"})
+		g = game.NewGame([]game.PlayerDef{
+			{Name: "Игрок", IsHuman: true},
+			{Name: "Бот 1", IsHuman: false},
+			{Name: "Бот 2", IsHuman: false},
+			{Name: "Бот 3", IsHuman: false},
+		})
 		cli.StartCardChoice(g, reader)
 	}
 

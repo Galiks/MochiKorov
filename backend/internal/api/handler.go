@@ -1,6 +1,8 @@
 package api
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -220,8 +222,9 @@ func (h *handler) handleListSessions(w http.ResponseWriter, r *http.Request) {
 
 func (h *handler) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		ID   string `json:"id"`
-		Name string `json:"name"`
+		ID         string `json:"id"`
+		Name       string `json:"name"`
+		MaxPlayers int    `json:"max_players"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid JSON: "+err.Error())
@@ -234,15 +237,25 @@ func (h *handler) handleCreateSession(w http.ResponseWriter, r *http.Request) {
 	if req.Name == "" {
 		req.Name = req.ID
 	}
+	if req.MaxPlayers < 2 || req.MaxPlayers > 5 {
+		req.MaxPlayers = 2
+	}
 
-	sess, err := h.store.CreateSession(req.ID, req.Name)
+	tokenBytes := make([]byte, 16)
+	rand.Read(tokenBytes)
+	creatorToken := hex.EncodeToString(tokenBytes)
+
+	sess, err := h.store.CreateSession(req.ID, req.Name, req.MaxPlayers, creatorToken)
 	if err != nil {
 		log.Printf("create session: %v", err)
 		writeError(w, http.StatusConflict, err.Error())
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, sess)
+	writeJSON(w, http.StatusCreated, map[string]interface{}{
+		"session": sess,
+		"token":   creatorToken,
+	})
 }
 
 func (h *handler) handleGetSession(w http.ResponseWriter, r *http.Request) {
