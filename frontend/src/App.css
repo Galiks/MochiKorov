@@ -352,7 +352,7 @@ header {
 
 .market-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 8px;
 }
 
@@ -469,6 +469,73 @@ header {
 .mini-color.green { background: var(--green); }
 .mini-color.red { background: var(--red); }
 .mini-color.purple { background: var(--purple); }
+
+/* Hand color group headers */
+.color-group-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  margin-bottom: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: opacity 0.2s;
+}
+.color-group-header:hover {
+  opacity: 0.8;
+}
+.color-group-header .cg-count {
+  margin-left: auto;
+  font-size: 0.65rem;
+  opacity: 0.6;
+}
+.color-group-header .cg-arrow {
+  font-size: 0.5rem;
+  transition: transform 0.2s;
+}
+.color-group-header.collapsed .cg-arrow {
+  transform: rotate(-90deg);
+}
+
+/* Hand mini-cards grid */
+.hand-cards-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.hand-mini-card {
+  width: 68px;
+  padding: 5px 3px;
+  border-radius: 5px;
+  text-align: center;
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: all 0.2s;
+}
+.hand-mini-card .hmc-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  margin-bottom: 1px;
+}
+.hand-mini-card .hmc-name {
+  font-size: 0.5rem;
+  line-height: 1.1;
+  word-break: break-word;
+}
+.hand-mini-card .hmc-count {
+  font-size: 0.6rem;
+  margin-top: 1px;
+  opacity: 0.85;
+}
 
 /* Center Panel */
 .current-player-info {
@@ -597,12 +664,12 @@ header {
 .market-card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 10px;
-  padding: 10px;
+  border-radius: 8px;
+  padding: 8px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   cursor: pointer;
   transition: all 0.2s;
   color: var(--card-text);
@@ -627,6 +694,14 @@ header {
   box-shadow: 0 8px 20px rgba(0,0,0,0.35);
 }
 
+.market-card.card-deactivated,
+.hand-mini-card.card-deactivated {
+  transform: rotate(90deg) scale(0.85) !important;
+  opacity: 0.4;
+  filter: grayscale(0.8);
+  pointer-events: none;
+}
+
 .market-card .mc-badge {
   font-size: 0.6rem;
   text-transform: uppercase;
@@ -641,15 +716,15 @@ header {
 }
 
 .market-card .mc-icon {
-  font-size: 1.6rem;
+  font-size: 1.35rem;
   line-height: 1;
-  margin: 2px 0;
+  margin: 1px 0;
 }
 
 .market-card .mc-name {
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .market-card .mc-meta {
@@ -669,17 +744,61 @@ header {
 }
 
 .market-card .mc-dice {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: var(--card-text2);
 }
 
 .market-card .mc-effect {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   color: var(--card-text2);
 }
 
 .landmark-card {
   border-color: var(--purple);
+}
+
+/* Color section headers for Market */
+.color-section-header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  transition: all 0.2s;
+  margin-top: 4px;
+  color: var(--text);
+}
+.color-section-header:hover {
+  opacity: 0.8;
+}
+.color-section-header .cs-count {
+  margin-left: auto;
+  font-weight: 400;
+  font-size: 0.65rem;
+  opacity: 0.6;
+}
+.color-section-header .cs-arrow {
+  font-size: 0.55rem;
+  transition: transform 0.2s;
+}
+.color-section-header.hidden .cs-arrow {
+  transform: rotate(-90deg);
+}
+.color-section-header.color-blue { background: rgba(52, 152, 219, 0.2); border-left: 3px solid var(--blue); }
+.color-section-header.color-green { background: rgba(46, 204, 113, 0.2); border-left: 3px solid var(--green); }
+.color-section-header.color-red { background: rgba(231, 76, 60, 0.2); border-left: 3px solid var(--red); }
+.color-section-header.color-purple { background: rgba(155, 89, 182, 0.2); border-left: 3px solid var(--purple); }
+
+/* Market info (legacy) */
+.mc-info {
+  flex: 1;
 }
 
 .mc-info {
